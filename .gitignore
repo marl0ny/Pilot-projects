@@ -1,0 +1,13 @@
+.DS_Store
+.idea
+.*
+!.gitignore
+*.o
+program
+*.zip
+/**/imgui
+*.ini
+/**/Eigen
+*.png
+*.mp4
+/**/video_image_results
