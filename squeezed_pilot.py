@@ -111,7 +111,7 @@ def compare():
     x_avg = x0*c + p0*s/(m*omega)
     sigma_t = sqrt(hbar2*s*s + 4.0*m2*omega2*sigma4*c*c)\
         /abs(2.0*m*omega*sigma)
-    x_t = x_avg + (x - x0)*sigma_t/sigma
+    x_t = x_avg + (x - x0)*(sigma_t/sigma)
     print(diff(x_t, t))
     # print((diff(x_t, t) - x_dot.simplify()).simplify()
     #       .subs(omega, 1.0)
@@ -123,6 +123,14 @@ def compare():
     #       .subs(x, 1.0))
     # print(limit(x_dot, t, 0.0))
     # print(limit(x_dot.subs(omega, pi), t, 1))
+
+def get_x_avg(t):
+    return X0*np.cos(OMEGA*t) + P0*np.sin(OMEGA*t)/(MASS*OMEGA)
+
+def get_sigma_t(t):
+    return np.sqrt(HBAR**2*np.sin(OMEGA*t)**2 
+                   + 4.0*MASS**2*OMEGA**2*SIGMA**4*np.cos(OMEGA*t)**2
+                   )/np.abs(2.0*MASS*OMEGA*SIGMA)
 
 # compare()
 
@@ -155,23 +163,15 @@ def eom(x, t):
 def eom2(x, t):
     hbar = HBAR
     sigma = SIGMA
-    hbar2 = HBAR**2
-    pi = np.pi
-    omega, omega2, omega3 = OMEGA, OMEGA**2, OMEGA**3
-    omega_t = omega*t
-    sigma4 = SIGMA**4
+    omega = OMEGA
+    m = MASS
     x0, p0 = X0, P0
-    c, s = np.cos(omega*t), np.sin(omega*t)
-    c2, c3 = c**2, c**3
-    s2, s3 = s**2, s**3
-    m, m2, m3 = MASS, MASS**2, MASS**3
-    return (-omega*x0*np.sin(omega*t) 
+    return -omega*x0*np.sin(omega*t) \
             + 1.0*(x - x0)*(0.25*hbar**2*omega*np.sin(omega*t)*np.cos(omega*t) 
                             - m**2*omega**3*sigma**4*np.sin(omega*t)*np.cos(omega*t)
                             )/(sigma*np.sqrt(0.25*hbar**2*np.sin(omega*t)**2 
-                                          + m**2*omega**2*sigma**4*np.cos(omega*t)**2)*
-                                          np.abs(m*omega*sigma)) 
-                                          + p0*np.cos(omega*t)/m)
+                                             + m**2*omega**2*sigma**4*np.cos(omega*t)**2)*
+                                             np.abs(m*omega*sigma)) + p0*np.cos(omega*t)/m
 
 # def stuff(t):
 #     hbar2 = HBAR**2
@@ -213,14 +213,16 @@ def standard_dev(t):
         /abs(2.0*m*omega*sigma)
 
 
-x0 = np.array([X0 + SIGMA/2.0, X0 - SIGMA/2.0])
-# x0 = np.linspace(X0, X0 + SIGMA/2.0, TOTAL_TRAJECTORIES)
+# x0 = np.array([X0 + 3.0*SIGMA/4.0, X0 - 3.0*SIGMA/4.0])
+x0 = np.linspace(X0, X0 + SIGMA/2.0, TOTAL_TRAJECTORIES//10)
 x_t = odeint(eom, x0, TIME_SLICES)
-x_t2 = odeint(eom2, x0, TIME_SLICES)
+x_t2 = np.array([
+    (get_x_avg(TIME_SLICES) 
+     + (e - X0)*get_sigma_t(TIME_SLICES)/SIGMA) for e in x0]).T
 
 
 plt.plot(TIME_SLICES, x_t, alpha=1.0, color='blue')
-plt.plot(TIME_SLICES, x_t2, alpha=1.0, color='orange')
+plt.plot(TIME_SLICES, x_t2, alpha=1.0, color='orange', linestyle='--')
 # plt.plot(TIME_SLICES, x_t, alpha=0.01, color='blue')
 plt.plot(TIME_SLICES, avg_x(TIME_SLICES), color='black')
 plt.plot(TIME_SLICES, 
