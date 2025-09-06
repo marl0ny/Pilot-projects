@@ -72,21 +72,35 @@ void imgui_controls(void *void_params) {
            s_sim_params_set(params->M, params->m);
     if (ImGui::SliderFloat("Time step", &params->dt, 0.0, 0.3))
            s_sim_params_set(params->DT, params->dt);
-    if (ImGui::BeginMenu("Preset V(x, y, t)")) {
-        if (ImGui::MenuItem( "((x/width)^2 + (y/height)^2)"))
-            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 0);
-        if (ImGui::MenuItem( "amp*((x/width)^2 + (y/height)^2)"))
-            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 1);
-        if (ImGui::MenuItem( "(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)"))
-            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 2);
-        if (ImGui::MenuItem( "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)"))
-            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 3);
-        if (ImGui::MenuItem( "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01"))
-            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 4);
+    if (ImGui::BeginMenu("Use mouse to:")) {
+        if (ImGui::MenuItem( "Create new wave function"))
+            s_selection_set(params->MOUSE_USAGE_ENTRY, 0);
+        if (ImGui::MenuItem( "Draw potential barrier"))
+            s_selection_set(params->MOUSE_USAGE_ENTRY, 1);
+        if (ImGui::MenuItem( "Erase potential barrier"))
+            s_selection_set(params->MOUSE_USAGE_ENTRY, 2);
         ImGui::EndMenu();
     }
     if (ImGui::SliderInt("Particle count upon placement of new wave function", &params->numberOfParticles, 4096, 1048576))
             s_sim_params_set(params->NUMBER_OF_PARTICLES, params->numberOfParticles);
+    ImGui::Checkbox("Show particle trails", &params->showTrails);
+    if (ImGui::BeginMenu("Preset V(x, y, t)")) {
+        if (ImGui::MenuItem( "((x/width)^2 + (y/height)^2)"))
+            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 0);
+        if (ImGui::MenuItem( "0"))
+            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 1);
+        if (ImGui::MenuItem( "amp*((x/width)^2 + (y/height)^2)"))
+            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 2);
+        if (ImGui::MenuItem( "(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)"))
+            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 3);
+        if (ImGui::MenuItem( "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)"))
+            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 4);
+        if (ImGui::MenuItem( "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01"))
+            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 5);
+        if (ImGui::MenuItem( "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"))
+            s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 6);
+        ImGui::EndMenu();
+    }
     ImGui::Text("(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)");
     ImGui::Checkbox("Add absorbing boundaries (may incur instability!)", &params->addAbsorbingBoundaries);
 

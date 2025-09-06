@@ -104,6 +104,9 @@ void simulation_ui_interface_handler(
                 display_parameters_as_sliders(
                     params.USER_TEXT_ENTRY, variables_set, {"t"});
             }
+            if (c == params.MOUSE_USAGE_ENTRY) {
+                params.mouseUsageEntry.selected = val;
+            }
         };
     }
 
@@ -119,6 +122,9 @@ void simulation_ui_interface_handler(
 
     s_loop = [&] {
 
+        enum {
+            MOUSE_USAGE_NEW_WAVE_FUNC=0, 
+            MOUSE_USAGE_DRAW_V=1, MOUSE_USAGE_ERASE_V=2};
         if (start_position.has_value()) {
             if (cursor_positions.size() > 1) {
                 Vec2 delta_2d = interactor.get_mouse_delta();
@@ -131,12 +137,23 @@ void simulation_ui_interface_handler(
                 Vec2 wave_num = cursor_positions.back() - start_position.value();
                 wave_num.x *= float(params.waveDiscretizationDimensions[0])/4.0;
                 wave_num.y *= float(params.waveDiscretizationDimensions[1])/4.0;
-                sim.new_wave_function(
-                    params, start_position.value(), wave_num);
+                if (params.mouseUsageEntry.selected 
+                        == MOUSE_USAGE_NEW_WAVE_FUNC) {
+                    sim.new_wave_function(
+                        params, start_position.value(), wave_num);
+                } else if (params.mouseUsageEntry.selected == MOUSE_USAGE_DRAW_V) {
+                    sim.sketch_potential(params, cursor_positions.back(), 0.05);
+                } else if (params.mouseUsageEntry.selected == MOUSE_USAGE_ERASE_V) {
+                    sim.sketch_potential(params, cursor_positions.back(), -0.05);
+                }
             } else {
-                sim.new_wave_function(
-                    params, cursor_positions.back(), Vec2{.ind{0.0, 0.0}});
-                sim.new_particles(params, start_position.value());
+                if (params.mouseUsageEntry.selected 
+                        == MOUSE_USAGE_NEW_WAVE_FUNC) {
+                    sim.new_wave_function(
+                        params, 
+                        cursor_positions.back(), Vec2{.ind{0.0, 0.0}});
+                    sim.new_particles(params, start_position.value());
+                }
             }
             params.t = 0.0;
         }
@@ -150,7 +167,10 @@ void simulation_ui_interface_handler(
 
         }
         for (int i = 0; 
-            i < params.stepsPerFrame  && !start_position.has_value(); i++) {
+            i < params.stepsPerFrame  
+            && !(start_position.has_value() 
+                 && params.mouseUsageEntry.selected 
+                 == MOUSE_USAGE_NEW_WAVE_FUNC); i++) {
             sim.time_step(params);
             params.t += params.dt;
         }

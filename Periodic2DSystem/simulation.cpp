@@ -32,6 +32,9 @@ Programs::Programs() {
     this->copy = Quad::make_program_from_path(
         "./shaders/util/copy.frag"
     );
+    this->scale = Quad::make_program_from_path(
+        "./shaders/util/scale.frag"
+    );
     this->blur = Quad::make_program_from_path(
         "./shaders/util/blur.frag"
     );
@@ -47,17 +50,20 @@ Programs::Programs() {
     this->gray_scale = Quad::make_program_from_path(
         "./shaders/util/gray-scale.frag"
     );
+    this->sketch_potential = Quad::make_program_from_path(
+        "./shaders/potential/sketch-potential.frag"
+    );
     this->modify_potential_entry = Quad::make_program_from_path(
-        "./shaders/modify-potential-entry.frag"
+        "./shaders/potential/modify-potential-entry.frag"
     );
     this->time_step = Quad::make_program_from_path(
-        "./shaders/time-step.frag"
+        "./shaders/wave-function/time-step.frag"
     );
     this->init_wave_packet = Quad::make_program_from_path(
-        "./shaders/gaussian.frag"
+        "./shaders/wave-function/gaussian.frag"
     );
     this->guide = Quad::make_program_from_path(
-        "./shaders/guide.frag"
+        "./shaders/particles/guide.frag"
     );
     this->rk4 = Quad::make_program_from_path(
         "./shaders/integration/rk4.frag"
@@ -66,7 +72,7 @@ Programs::Programs() {
         "./shaders/integration/forward-euler.frag"
     );
     this->display_circles = make_program_from_paths(
-        "./shaders/circles-display.vert",
+        "./shaders/particles/circles-display.vert",
         "./shaders/util/uniform-color.frag"
     );
     this->user_defined = 0;
@@ -112,6 +118,7 @@ Frames(const TextureParams &default_tex_params, const SimParams &params):
     potential(Quad(wave_sim_tex_params)),
     tmp(Quad(wave_sim_tex_params)),
     render_intermediates{
+        RenderTarget(default_tex_params),
         RenderTarget(default_tex_params),
         RenderTarget(default_tex_params)},
     particles_view(RenderTarget(default_tex_params)),
@@ -218,6 +225,8 @@ void Simulation::new_particles(
         configs_f[2*i + 1] = y*params.waveSimulationDimensions[1];
     }
     m_frames.trajectories.particles.set_pixels(&configs_f[0]);
+    if (params.showTrails)
+        m_frames.particles_view.clear();
 }
 
 const RenderTarget &Simulation
@@ -240,7 +249,8 @@ const RenderTarget &Simulation
         },
         m_frames.quad_wire_frame
     );
-    m_frames.particles_view.clear();
+    if (!params.showTrails)
+        m_frames.particles_view.clear();
     m_frames.particles_view.draw(
         m_programs.display_circles,
         {
@@ -259,6 +269,23 @@ const RenderTarget &Simulation
             {"tex3", &m_frames.particles_view},
         }, 
         m_frames.quad_wire_frame);
+    if (params.showTrails) {
+        m_frames.render_intermediates[2].draw(
+            m_programs.scale,
+            {
+                {"tex", &m_frames.particles_view},
+                {"scale", 0.95F}
+            },
+            m_frames.quad_wire_frame
+        );
+        m_frames.particles_view.draw(
+            m_programs.copy,
+            {
+                {"tex", &m_frames.render_intermediates[2]}
+            },
+            m_frames.quad_wire_frame
+        );
+    }
     return m_frames.render;
 }
 
@@ -273,7 +300,9 @@ void Simulation::compute_guide(
             {"psiTex", wave},
             {"qTex", &q},
             {"dimensions2D", params.waveSimulationDimensions},
-            {"textureDimensions2D", params.waveDiscretizationDimensions}
+            {"textureDimensions2D", params.waveDiscretizationDimensions},
+            // {"potentialTex",&m_frames.potential},
+            {"imposeAbsorbingBoundaries", int(params.addAbsorbingBoundaries)}
         }
     );
 }
@@ -336,7 +365,14 @@ void Simulation::trajectories_time_step_rk4(const SimParams &params) {
             {"qDotTex2", &m_frames.trajectories.rk4[2]},
             {"qDotTex3", &m_frames.trajectories.rk4[3]},
             {"qDotTex4", &m_frames.trajectories.rk4[4]},
-            {"dt", params.dt}
+            {"dt", params.dt},
+            {"periodicizeResult", int(true)},
+            {"minBoundaryVal", Vec4{.ind={0.0}}},
+            {"domainDimensions", Vec4{.ind{
+                   params.waveSimulationDimensions[0],
+                   params.waveSimulationDimensions[1],
+                   params.waveSimulationDimensions[0],
+                   params.waveSimulationDimensions[1]}}},
         }
     );
 }
@@ -417,5 +453,25 @@ void Simulation::add_user_defined_potential(
                     int(sim_params.addAbsorbingBoundaries)},
             {"rawPotentialTex", &m_frames.tmp}
         }
+    );
+}
+
+void Simulation::sketch_potential(
+    const SimParams &params,
+    const Vec2 &position, float amplitude
+) {
+    m_frames.tmp.draw(
+        m_programs.sketch_potential,
+        {
+            {"tex", &m_frames.potential},
+            {"offsetTexCoord", position},
+            {"sigmaTexCoord", Vec2{.x=0.02, .y=0.02}},
+            {"amplitude", amplitude},
+            {"maxScalarValue", 1.0F},
+        }
+    );
+    m_frames.potential.draw(
+        m_programs.copy,
+        {{"tex", &m_frames.tmp}}
     );
 }

@@ -1,4 +1,4 @@
-/* Generate a new wavepacket. */
+/* Generate a new wave packet. */
 #if (__VERSION__ >= 330) || (defined(GL_ES) && __VERSION__ >= 300)
 #define texture2D texture
 #else

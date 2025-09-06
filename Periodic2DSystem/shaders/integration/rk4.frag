@@ -31,11 +31,27 @@ uniform sampler2D qDotTex3;
 uniform sampler2D qDotTex4;
 uniform float dt;
 
+uniform bool periodicizeResult;
+uniform vec4 minBoundaryVal;
+uniform vec4 domainDimensions;
+
+vec4 enforcePeriodicity(vec4 x) {
+    for (int i = 0; i < 3; i++) {
+        x[i] -= minBoundaryVal[i];
+        x[i] = (x[i] <= 0.0)? domainDimensions[i] + x[i]: x[i]; 
+        x[i] = (x[i] > domainDimensions[i])?
+            mod(x[i], domainDimensions[i]): x[i];
+        x[i] += minBoundaryVal[i];  
+    }
+    return x;
+}
+
 void main() {
     vec4 q0 = texture2D(qTex, UV);
     vec4 qDot1 = texture2D(qDotTex1, UV); 
     vec4 qDot2 = texture2D(qDotTex2, UV); 
     vec4 qDot3 = texture2D(qDotTex3, UV); 
-    vec4 qDot4 = texture2D(qDotTex4, UV); 
-    fragColor = q0 + dt*(qDot1 + 2.0*qDot2 + 2.0*qDot3 + qDot4)/6.0;
+    vec4 qDot4 = texture2D(qDotTex4, UV);
+    vec4 qF = q0 + dt*(qDot1 + 2.0*qDot2 + 2.0*qDot3 + qDot4)/6.0;
+    fragColor = (periodicizeResult)? enforcePeriodicity(qF): qF;
 }

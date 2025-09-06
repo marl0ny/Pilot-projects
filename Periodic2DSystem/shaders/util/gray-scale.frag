@@ -22,7 +22,7 @@ uniform float offset;
 uniform float maxBrightness;
 
 void main() {
-    vec4 color = vec4(texture2D(tex, UV)[0] + offset);
+    vec4 color = vec4(texture2D(tex, UV)[0] + abs(texture2D(tex, UV)[1]) + offset);
     fragColor = max(min(brightness*color, maxBrightness), -maxBrightness);
 }
 

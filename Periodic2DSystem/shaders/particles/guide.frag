@@ -24,9 +24,12 @@ uniform sampler2D psiTex;
 uniform sampler2D qTex;
 uniform float dt;
 uniform sampler2D qDotTex;
+// uniform sampler2D potentialTex;
 
 uniform vec2 dimensions2D;
 uniform ivec2 textureDimensions2D;
+
+uniform bool imposeAbsorbingBoundaries;
 
 #define complex vec2
 #define complex2 vec4
@@ -69,6 +72,34 @@ complex2 gradient4thOr(sampler2D tex, vec2 uv) {
     return complex2(dFDx, dFDy);
 }
 
+vec2 absorbingBoundaries(vec2 position, vec2 dQDt) {
+    float x = position.x/dimensions2D[0];
+    float y = position.y/dimensions2D[1];
+    float s = 0.02;
+    float a = 0.8;
+    // if (x <= 2.5*s)
+    //     dQDt *= max(0.0, smoothstep(0.0, 2.5*s, x)/(2.5*s))*normalize(dQDt);
+    // if (y <= 2.5*s)
+    //     dQDt *= max(0.0, smoothstep(0.0, 2.5*s, y)/(2.5*s))*normalize(dQDt); 
+    // if (x < 2.5*s)
+    //     dQDt *= 0.1*smoothstep(0.0, 2.5*s, x)/(2.5*s);
+    // if (x <= 2.5*s || x > (1.0 - 2.5*s) || 
+    //     y <= 2.5*s || y > (1.0 - 2.5*s))
+    //     dQDt = 0.075*normalize(dQDt);
+    // if (x <= s || x > (1.0 - s) || 
+    //     y <= s || y > (1.0 - s))
+    //     dQDt *=0.5;
+    vec2 dQDt2 = dQDt;
+    if (x > (1.0 - 2.5*s) || x <= 2.5*s)
+        dQDt2 = 0.5*vec2(normalize(dQDt).x, 0.0);
+    if (y > (1.0 - 2.5*s) || y <= 2.5*s)
+        dQDt2 = 0.5*vec2(0.0, normalize(dQDt).y);
+    if (x <= 0.1*s || x > (1.0 - 0.1*s) || 
+        y <= 0.1*s || y > (1.0 - 0.1*s))
+        dQDt2 *= 0.0;
+    return dQDt2;
+}
+
 void main() {
     vec2 position = texture2D(qTex, UV).xy + dt*texture2D(qDotTex, UV).xy;
     vec2 texPosition = vec2(
@@ -77,9 +108,14 @@ void main() {
     complex gradPsiX = gradPsi.xy;
     complex gradPsiY = gradPsi.zw;
     complex invPsi = inv(texture2D(psiTex, texPosition).xy);
+    // complex2 gradientV = gradient4thOr(potentialTex, texPosition);
+    // vec2 gradImV = vec2(gradientV.y, gradientV.w);
+    // complex invImV = 1.0/(texture2D(potentialTex, texPosition).y);
     vec2 dQDt = (hbar/m)*vec2(
         imag(mul(gradPsiX, invPsi)),
         imag(mul(gradPsiY, invPsi)));
+    if (imposeAbsorbingBoundaries)
+        dQDt = absorbingBoundaries(position, dQDt);
     fragColor = vec4(dQDt, dQDt);
 }
 

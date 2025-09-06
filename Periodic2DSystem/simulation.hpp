@@ -17,7 +17,7 @@ struct Frames {
     } trajectories;
     Quad potential;
     Quad tmp;
-    RenderTarget render_intermediates[2];
+    RenderTarget render_intermediates[3];
     RenderTarget particles_view;
     RenderTarget render;
     WireFrame quad_wire_frame;
@@ -29,12 +29,14 @@ struct Frames {
 
 struct Programs {
     unsigned int copy;
+    unsigned int scale;
     unsigned int user_defined;
     unsigned int blur;
     unsigned int add2, add3;
     unsigned int domain_color;
     unsigned int gray_scale;
     unsigned int modify_potential_entry;
+    unsigned int sketch_potential;
     unsigned int time_step;
     unsigned int init_wave_packet;
     unsigned int guide;
@@ -71,6 +73,10 @@ class Simulation {
         const SimParams &params,
         unsigned int program,
         const std::map<std::string, float> &uniforms);
+    void sketch_potential(
+        const SimParams &params,
+        const Vec2 &position, float amplitude
+    );
 };
 
 #endif

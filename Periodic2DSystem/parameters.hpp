@@ -33,11 +33,13 @@ struct SimParams {
     float waveFuncSize = (float)(0.025F);
     float m = (float)(1.0F);
     float dt = (float)(0.3F);
+    SelectionList mouseUsageEntry = SelectionList{0, {"Create new wave function", "Draw potential barrier", "Erase potential barrier"}};
     IVec2 waveDiscretizationDimensions = (IVec2)(IVec2 {.ind={512, 512}});
     Vec2 waveSimulationDimensions = (Vec2)(Vec2 {.ind={512.0, 512.0}});
-    SelectionList presetPotentialDropdown = SelectionList{0, {"((x/width)^2 + (y/height)^2)", "amp*((x/width)^2 + (y/height)^2)", "(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)", "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)", "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01"}};
-    EntryBoxes userTextEntry = EntryBoxes{"0"};
     int numberOfParticles = (int)(65536);
+    bool showTrails = (bool)(false);
+    SelectionList presetPotentialDropdown = SelectionList{0, {"((x/width)^2 + (y/height)^2)", "0", "amp*((x/width)^2 + (y/height)^2)", "(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)", "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)", "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01", "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"}};
+    EntryBoxes userTextEntry = EntryBoxes{"0"};
     Label userWarningLabel = Label{};
     bool addAbsorbingBoundaries = (bool)(false);
     int dummyValue = (int)(0);
@@ -50,14 +52,16 @@ struct SimParams {
         WAVE_FUNC_SIZE=5,
         M=6,
         DT=7,
-        WAVE_DISCRETIZATION_DIMENSIONS=8,
-        WAVE_SIMULATION_DIMENSIONS=9,
-        PRESET_POTENTIAL_DROPDOWN=10,
-        USER_TEXT_ENTRY=11,
-        NUMBER_OF_PARTICLES=12,
-        USER_WARNING_LABEL=13,
-        ADD_ABSORBING_BOUNDARIES=14,
-        DUMMY_VALUE=15,
+        MOUSE_USAGE_ENTRY=8,
+        WAVE_DISCRETIZATION_DIMENSIONS=9,
+        WAVE_SIMULATION_DIMENSIONS=10,
+        NUMBER_OF_PARTICLES=11,
+        SHOW_TRAILS=12,
+        PRESET_POTENTIAL_DROPDOWN=13,
+        USER_TEXT_ENTRY=14,
+        USER_WARNING_LABEL=15,
+        ADD_ABSORBING_BOUNDARIES=16,
+        DUMMY_VALUE=17,
     };
     void set(int enum_val, Uniform val) {
         switch(enum_val) {
@@ -94,6 +98,9 @@ struct SimParams {
             case NUMBER_OF_PARTICLES:
             numberOfParticles = val.i32;
             break;
+            case SHOW_TRAILS:
+            showTrails = val.b32;
+            break;
             case ADD_ABSORBING_BOUNDARIES:
             addAbsorbingBoundaries = val.b32;
             break;
@@ -126,6 +133,8 @@ struct SimParams {
             return {(Vec2)waveSimulationDimensions};
             case NUMBER_OF_PARTICLES:
             return {(int)numberOfParticles};
+            case SHOW_TRAILS:
+            return {(bool)showTrails};
             case ADD_ABSORBING_BOUNDARIES:
             return {(bool)addAbsorbingBoundaries};
             case DUMMY_VALUE:
