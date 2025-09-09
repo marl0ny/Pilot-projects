@@ -29,6 +29,7 @@ struct SimParams {
     int stepsPerFrame = (int)(6);
     float brightness = (float)(1.0F);
     float brightnessV = (float)(1.0F);
+    float brightnessParticles = (float)(1.0F);
     float hbar = (float)(1.0F);
     float waveFuncSize = (float)(0.025F);
     float m = (float)(1.0F);
@@ -38,7 +39,7 @@ struct SimParams {
     Vec2 waveSimulationDimensions = (Vec2)(Vec2 {.ind={512.0, 512.0}});
     int numberOfParticles = (int)(65536);
     bool showTrails = (bool)(false);
-    SelectionList presetPotentialDropdown = SelectionList{0, {"((x/width)^2 + (y/height)^2)", "0", "amp*((x/width)^2 + (y/height)^2)", "(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)", "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)", "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01", "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"}};
+    SelectionList presetPotentialDropdown = SelectionList{0, {"((x/width)^2 + (y/height)^2)", "0", "amp*((x/width)^2 + (y/height)^2)", "0.4*(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)", "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)", "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01", "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"}};
     EntryBoxes userTextEntry = EntryBoxes{"0"};
     Label userWarningLabel = Label{};
     bool addAbsorbingBoundaries = (bool)(false);
@@ -48,20 +49,21 @@ struct SimParams {
         STEPS_PER_FRAME=1,
         BRIGHTNESS=2,
         BRIGHTNESS_V=3,
-        HBAR=4,
-        WAVE_FUNC_SIZE=5,
-        M=6,
-        DT=7,
-        MOUSE_USAGE_ENTRY=8,
-        WAVE_DISCRETIZATION_DIMENSIONS=9,
-        WAVE_SIMULATION_DIMENSIONS=10,
-        NUMBER_OF_PARTICLES=11,
-        SHOW_TRAILS=12,
-        PRESET_POTENTIAL_DROPDOWN=13,
-        USER_TEXT_ENTRY=14,
-        USER_WARNING_LABEL=15,
-        ADD_ABSORBING_BOUNDARIES=16,
-        DUMMY_VALUE=17,
+        BRIGHTNESS_PARTICLES=4,
+        HBAR=5,
+        WAVE_FUNC_SIZE=6,
+        M=7,
+        DT=8,
+        MOUSE_USAGE_ENTRY=9,
+        WAVE_DISCRETIZATION_DIMENSIONS=10,
+        WAVE_SIMULATION_DIMENSIONS=11,
+        NUMBER_OF_PARTICLES=12,
+        SHOW_TRAILS=13,
+        PRESET_POTENTIAL_DROPDOWN=14,
+        USER_TEXT_ENTRY=15,
+        USER_WARNING_LABEL=16,
+        ADD_ABSORBING_BOUNDARIES=17,
+        DUMMY_VALUE=18,
     };
     void set(int enum_val, Uniform val) {
         switch(enum_val) {
@@ -76,6 +78,9 @@ struct SimParams {
             break;
             case BRIGHTNESS_V:
             brightnessV = val.f32;
+            break;
+            case BRIGHTNESS_PARTICLES:
+            brightnessParticles = val.f32;
             break;
             case HBAR:
             hbar = val.f32;
@@ -119,6 +124,8 @@ struct SimParams {
             return {(float)brightness};
             case BRIGHTNESS_V:
             return {(float)brightnessV};
+            case BRIGHTNESS_PARTICLES:
+            return {(float)brightnessParticles};
             case HBAR:
             return {(float)hbar};
             case WAVE_FUNC_SIZE:

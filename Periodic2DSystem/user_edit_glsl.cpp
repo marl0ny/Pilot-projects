@@ -63,6 +63,8 @@ complex absC(complex z) {
 }
 
 complex stepC(complex z) {
+    if (z.x >= -1.0 && z.x <= 1.0)
+        return complex(smoothstep(-1.0, 1.0, z.x), 0.0);
     return complex((z.x > 0.0)? 1.0: 0.0, 0.0);
 }
 

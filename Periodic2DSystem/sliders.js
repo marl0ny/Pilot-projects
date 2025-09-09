@@ -3,20 +3,21 @@ const ENUM_CODES = {
     STEPS_PER_FRAME: 1,
     BRIGHTNESS: 2,
     BRIGHTNESS_V: 3,
-    HBAR: 4,
-    WAVE_FUNC_SIZE: 5,
-    M: 6,
-    DT: 7,
-    MOUSE_USAGE_ENTRY: 8,
-    WAVE_DISCRETIZATION_DIMENSIONS: 9,
-    WAVE_SIMULATION_DIMENSIONS: 10,
-    NUMBER_OF_PARTICLES: 11,
-    SHOW_TRAILS: 12,
-    PRESET_POTENTIAL_DROPDOWN: 13,
-    USER_TEXT_ENTRY: 14,
-    USER_WARNING_LABEL: 15,
-    ADD_ABSORBING_BOUNDARIES: 16,
-    DUMMY_VALUE: 17,
+    BRIGHTNESS_PARTICLES: 4,
+    HBAR: 5,
+    WAVE_FUNC_SIZE: 6,
+    M: 7,
+    DT: 8,
+    MOUSE_USAGE_ENTRY: 9,
+    WAVE_DISCRETIZATION_DIMENSIONS: 10,
+    WAVE_SIMULATION_DIMENSIONS: 11,
+    NUMBER_OF_PARTICLES: 12,
+    SHOW_TRAILS: 13,
+    PRESET_POTENTIAL_DROPDOWN: 14,
+    USER_TEXT_ENTRY: 15,
+    USER_WARNING_LABEL: 16,
+    ADD_ABSORBING_BOUNDARIES: 17,
+    DUMMY_VALUE: 18,
 };
 
 function createScalarParameterSlider(
@@ -335,14 +336,15 @@ let controls = document.getElementById('controls');
 createScalarParameterSlider(controls, 1, "Steps per frame", "int", {'value': 6, 'min': 0, 'max': 20});
 createScalarParameterSlider(controls, 2, "Wave function brightness", "float", {'value': 1.0, 'min': 0.0, 'max': 2.0, 'step': 0.01});
 createScalarParameterSlider(controls, 3, "Potential brightness", "float", {'value': 1.0, 'min': 0.0, 'max': 2.0, 'step': 0.01});
-createScalarParameterSlider(controls, 5, "New wave function size", "float", {'value': 0.025, 'min': 0.02, 'max': 0.05, 'step': 0.001});
-createScalarParameterSlider(controls, 6, "Mass", "float", {'value': 1.0, 'min': 1.0, 'max': 5.0, 'step': 0.01});
-createScalarParameterSlider(controls, 7, "Time step", "float", {'value': 0.3, 'min': 0.0, 'max': 0.3, 'step': 0.01});
-createSelectionList(controls, 8, 0, "Use mouse to:", [ "Create new wave function",  "Draw potential barrier",  "Erase potential barrier"]);
-createScalarParameterSlider(controls, 11, "Particle count upon placement of new wave function", "int", {'value': 65536, 'min': 4096, 'max': 1048576, 'step': 4096});
-createCheckbox(controls, 12, "Show particle trails", false);
-createSelectionList(controls, 13, 0, "Preset V(x, y, t)", [ "((x/width)^2 + (y/height)^2)",  "0",  "amp*((x/width)^2 + (y/height)^2)",  "(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)",  "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)",  "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01",  "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"]);
-createEntryBoxes(controls, 14, "Enter potential V(x, y, t)", 1, []);
-createLabel(controls, 15, "(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)", "");
-createCheckbox(controls, 16, "Add absorbing boundaries (may incur instability!)", false);
+createScalarParameterSlider(controls, 4, "Particle brightness", "float", {'value': 1.0, 'min': 0.0, 'max': 1.0, 'step': 0.01});
+createScalarParameterSlider(controls, 6, "New wave function size", "float", {'value': 0.025, 'min': 0.02, 'max': 0.05, 'step': 0.001});
+createScalarParameterSlider(controls, 7, "Mass", "float", {'value': 1.0, 'min': 1.0, 'max': 5.0, 'step': 0.01});
+createScalarParameterSlider(controls, 8, "Time step", "float", {'value': 0.3, 'min': 0.0, 'max': 0.3, 'step': 0.01});
+createSelectionList(controls, 9, 0, "Use mouse to:", [ "Create new wave function",  "Draw potential barrier",  "Erase potential barrier"]);
+createScalarParameterSlider(controls, 12, "Particle count upon placement of new wave function", "int", {'value': 65536, 'min': 4096, 'max': 1048576, 'step': 4096});
+createCheckbox(controls, 13, "Show particle trails", false);
+createSelectionList(controls, 14, 0, "Preset V(x, y, t)", [ "((x/width)^2 + (y/height)^2)",  "0",  "amp*((x/width)^2 + (y/height)^2)",  "0.4*(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)",  "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)",  "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01",  "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"]);
+createEntryBoxes(controls, 15, "Enter potential V(x, y, t)", 1, []);
+createLabel(controls, 16, "(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)", "");
+createCheckbox(controls, 17, "Add absorbing boundaries (may incur instability!)", false);
 

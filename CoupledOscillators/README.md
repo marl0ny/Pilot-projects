@@ -1,6 +1,6 @@
 # 1D Coupled Harmonic Oscillators (WIP)
 
-[Visualization](https://marl0ny.github.io/1D-Coupled-Oscillators/compiled/) of a 1D chain of coupled quantum harmonic oscillators,  both in terms of its untransformed positions and in decoupled normal coordinates. This is primarily based on an [AAPT article](https://doi.org/10.1119/1.1446858) by Scott Johnson and Thomas Gutierrez.
+[Visualization](https://marl0ny.github.io/Pilot-projects/CoupledOscillators/index.html) of a 1D chain of coupled quantum harmonic oscillators, in terms of its untransformed positions and in decoupled normal coordinates. This is primarily based on an [AAPT article](https://doi.org/10.1119/1.1446858) by Scott Johnson and Thomas Gutierrez.
 
 # References:
 

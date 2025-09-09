@@ -254,7 +254,8 @@ int main(int argc, char *argv[]) {
     }
     SimParams params {};
     TextureParams default_tex_params = {
-        .format=GL_RGBA32F,
+        .format=(unsigned int)
+            ((filter_type == GL_NEAREST)? GL_RGBA8: GL_RGBA32F),
         .width=(unsigned int)window_width,
         .height=(unsigned int)window_height,
         .generate_mipmap=!(filter_type == GL_NEAREST),

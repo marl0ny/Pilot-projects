@@ -66,6 +66,8 @@ void imgui_controls(void *void_params) {
            s_sim_params_set(params->BRIGHTNESS, params->brightness);
     if (ImGui::SliderFloat("Potential brightness", &params->brightnessV, 0.0, 2.0))
            s_sim_params_set(params->BRIGHTNESS_V, params->brightnessV);
+    if (ImGui::SliderFloat("Particle brightness", &params->brightnessParticles, 0.0, 1.0))
+           s_sim_params_set(params->BRIGHTNESS_PARTICLES, params->brightnessParticles);
     if (ImGui::SliderFloat("New wave function size", &params->waveFuncSize, 0.02, 0.05))
            s_sim_params_set(params->WAVE_FUNC_SIZE, params->waveFuncSize);
     if (ImGui::SliderFloat("Mass", &params->m, 1.0, 5.0))
@@ -91,7 +93,7 @@ void imgui_controls(void *void_params) {
             s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 1);
         if (ImGui::MenuItem( "amp*((x/width)^2 + (y/height)^2)"))
             s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 2);
-        if (ImGui::MenuItem( "(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)"))
+        if (ImGui::MenuItem( "0.4*(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)"))
             s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 3);
         if (ImGui::MenuItem( "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)"))
             s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 4);

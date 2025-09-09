@@ -251,16 +251,27 @@ const RenderTarget &Simulation
     );
     if (!params.showTrails)
         m_frames.particles_view.clear();
+    float particle_brightness = params.brightnessParticles;
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     m_frames.particles_view.draw(
         m_programs.display_circles,
         {
             {"coordTex", &m_frames.trajectories.particles},
             {"circleRadius", 0.001F},
             {"dimensions2D", params.waveSimulationDimensions},
-            {"color", Vec4{.r=1.0, .g=1.0, .b=1.0, .a=1.0}}
+            {"color", 
+                    Vec4{
+                        .r=1.0,
+                        .g=1.0,
+                        .b=1.0,
+                        .a=particle_brightness
+                    }
+                }
         },
         m_frames.trajectories_wire_frame
     );
+    glDisable(GL_BLEND);
     m_frames.render.draw(
         m_programs.add3,
         {
@@ -292,6 +303,9 @@ const RenderTarget &Simulation
 void Simulation::compute_guide(
     Quad &q2, const Quad *wave, const Quad &q,
         const SimParams &params) {
+    bool use_nearest_sampling = (
+        m_frames.wave_sim_tex_params.min_filter != GL_LINEAR ||
+        m_frames.wave_sim_tex_params.mag_filter != GL_LINEAR);
     q2.draw(
         m_programs.guide,
         {
@@ -301,6 +315,7 @@ void Simulation::compute_guide(
             {"qTex", &q},
             {"dimensions2D", params.waveSimulationDimensions},
             {"textureDimensions2D", params.waveDiscretizationDimensions},
+            {"nearestSamplingOnly", int(use_nearest_sampling)},
             // {"potentialTex",&m_frames.potential},
             {"imposeAbsorbingBoundaries", int(params.addAbsorbingBoundaries)}
         }
@@ -311,6 +326,10 @@ void Simulation::compute_guide(
     Quad &q2, const Quad *wave,
     const Quad &q, double dt, const Quad &q_dot,
     const SimParams &params) {
+    bool use_nearest_sampling = (
+        m_frames.wave_sim_tex_params.min_filter != GL_LINEAR ||
+        m_frames.wave_sim_tex_params.mag_filter != GL_LINEAR);
+    printf("Use nearest sampling: %d\n", use_nearest_sampling);
     q2.draw(
         m_programs.guide,
         {
@@ -320,6 +339,7 @@ void Simulation::compute_guide(
             {"qTex", &q},
             {"dt", dt},
             {"qDotTex", &q_dot},
+            {"nearestSamplingOnly", int(use_nearest_sampling)},
             {"dimensions2D", params.waveSimulationDimensions},
             {"textureDimensions2D", params.waveDiscretizationDimensions}
         }

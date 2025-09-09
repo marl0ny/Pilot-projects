@@ -1,4 +1,5 @@
-/* Generate a new wavepacket. */
+/* Guide the particle using the pilot wave.
+ */
 #if (__VERSION__ >= 330) || (defined(GL_ES) && __VERSION__ >= 300)
 #define texture2D texture
 #else
@@ -24,6 +25,7 @@ uniform sampler2D psiTex;
 uniform sampler2D qTex;
 uniform float dt;
 uniform sampler2D qDotTex;
+uniform bool nearestSamplingOnly;
 // uniform sampler2D potentialTex;
 
 uniform vec2 dimensions2D;
@@ -50,6 +52,42 @@ float imag(complex z) {
     return z.y;
 }
 
+/*Bilinear interpolation. */
+vec4 blI(vec2 r, float x0, float y0, float x1, float y1,
+         vec4 w00, vec4 w10, vec4 w01, vec4 w11) {
+    float dx = x1 - x0, dy = y1 - y0;
+    float ax = (dx == 0.0)? 0.0: (r.x - x0)/dx;
+    float ay = (dy == 0.0)? 0.0: (r.y - y0)/dy;
+    return mix(mix(w00, w10, ax), mix(w01, w11, ax), ay);
+}
+
+/* Some devices do not support linear texture filtering
+for floating point textures. If the sampling is restriced
+to nearest (as set by the nearestSamplingOnly uniform bool),
+then get the nearest four texel values to the texture
+coordinate r, and perform a manual bilinear interpolation of 
+the texture value at r. */
+vec4 customSampler(sampler2D tex, vec2 r) {
+    if (!nearestSamplingOnly)
+        return texture2D(tex, r);
+    float width = float(textureDimensions2D[0]);
+    float height = float(textureDimensions2D[1]);
+    float x0 = (floor(r.x*width - 0.5) + 0.5)/width;
+    float y0 = (floor(r.y*height - 0.5) + 0.5)/height;
+    float x1 = (ceil(r.x*width - 0.5) + 0.5)/width;
+    float y1 = (ceil(r.y*height - 0.5) + 0.5)/height;
+    vec2 r00 = vec2(x0, y0);
+    vec2 r10 = vec2(x1, y0);
+    vec2 r01 = vec2(x0, y1);
+    vec2 r11 = vec2(x1, y1);
+    vec4 f = texture2D(tex, r);
+    vec4 f00 = texture2D(tex, r00);
+    vec4 f10 = texture2D(tex, r10);
+    vec4 f01 = texture2D(tex, r01);
+    vec4 f11 = texture2D(tex, r11);
+    return blI(r.xy, x0, y0, x1, y1, f00, f10, f01, f11);
+}
+
 complex2 gradient4thOr(sampler2D tex, vec2 uv) {
     float du = 1.0/float(textureDimensions2D[0]);
     float dv = 1.0/float(textureDimensions2D[1]);
@@ -57,14 +95,14 @@ complex2 gradient4thOr(sampler2D tex, vec2 uv) {
     float dy = dimensions2D[1]/float(textureDimensions2D[1]);
     complex up2, up1, center, down1, down2;
     complex left2, left1, right1, right2;
-    up2 = texture2D(tex, uv + vec2(0.0, 2.0*dv)).xy;
-    up1 = texture2D(tex, uv + vec2(0.0, dv)).xy;
-    down1 = texture2D(tex, uv + vec2(0.0, -dv)).xy;
-    down2 = texture2D(tex, uv + vec2(0.0, -2.0*dv)).xy;
-    left2 = texture2D(tex, uv + vec2(-2.0*du, 0.0)).xy;
-    left1 = texture2D(tex, uv + vec2(-du, 0.0)).xy;
-    right1 = texture2D(tex, uv + vec2(du, 0.0)).xy;
-    right2 = texture2D(tex, uv + vec2(2.0*du, 0.0)).xy;
+    up2 = customSampler(tex, uv + vec2(0.0, 2.0*dv)).xy;
+    up1 = customSampler(tex, uv + vec2(0.0, dv)).xy;
+    down1 = customSampler(tex, uv + vec2(0.0, -dv)).xy;
+    down2 = customSampler(tex, uv + vec2(0.0, -2.0*dv)).xy;
+    left2 = customSampler(tex, uv + vec2(-2.0*du, 0.0)).xy;
+    left1 = customSampler(tex, uv + vec2(-du, 0.0)).xy;
+    right1 = customSampler(tex, uv + vec2(du, 0.0)).xy;
+    right2 = customSampler(tex, uv + vec2(2.0*du, 0.0)).xy;
     // center = texture2D(tex, UV);
     complex dFDx, dFDy; 
     dFDx = (left2/12.0 - 2.0*left1/3.0 + 2.0*right1/3.0 - right2/12.0)/dx;
