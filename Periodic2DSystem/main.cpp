@@ -108,6 +108,12 @@ void simulation_ui_interface_handler(
                 params.mouseUsageEntry.selected = val;
             }
         };
+        s_image_set = [&params, &sim] (int c, const std::string &image_data,
+            int width, int height) {
+            sim.set_potential_from_image(
+                params, (uint8_t *)&image_data[0],
+                {.ind{width, height}});
+        };
     }
 
     { // Initial configuration from the default preset option

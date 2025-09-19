@@ -10,14 +10,17 @@ const ENUM_CODES = {
     DT: 8,
     MOUSE_USAGE_ENTRY: 9,
     WAVE_DISCRETIZATION_DIMENSIONS: 10,
-    WAVE_SIMULATION_DIMENSIONS: 11,
-    NUMBER_OF_PARTICLES: 12,
-    SHOW_TRAILS: 13,
-    PRESET_POTENTIAL_DROPDOWN: 14,
-    USER_TEXT_ENTRY: 15,
-    USER_WARNING_LABEL: 16,
-    ADD_ABSORBING_BOUNDARIES: 17,
-    DUMMY_VALUE: 18,
+    POTENTIAL_GRID_WIDTH: 11,
+    POTENTIAL_GRID_HEIGHT: 12,
+    WAVE_SIMULATION_DIMENSIONS: 13,
+    NUMBER_OF_PARTICLES: 14,
+    SHOW_TRAILS: 15,
+    PRESET_POTENTIAL_DROPDOWN: 16,
+    USER_TEXT_ENTRY: 17,
+    USER_WARNING_LABEL: 18,
+    ADD_ABSORBING_BOUNDARIES: 19,
+    IMAGE_POTENTIAL: 20,
+    DUMMY_VALUE: 21,
 };
 
 function createScalarParameterSlider(
@@ -341,10 +344,11 @@ createScalarParameterSlider(controls, 6, "New wave function size", "float", {'va
 createScalarParameterSlider(controls, 7, "Mass", "float", {'value': 1.0, 'min': 1.0, 'max': 5.0, 'step': 0.01});
 createScalarParameterSlider(controls, 8, "Time step", "float", {'value': 0.3, 'min': 0.0, 'max': 0.3, 'step': 0.01});
 createSelectionList(controls, 9, 0, "Use mouse to:", [ "Create new wave function",  "Draw potential barrier",  "Erase potential barrier"]);
-createScalarParameterSlider(controls, 12, "Particle count upon placement of new wave function", "int", {'value': 65536, 'min': 4096, 'max': 1048576, 'step': 4096});
-createCheckbox(controls, 13, "Show particle trails", false);
-createSelectionList(controls, 14, 0, "Preset V(x, y, t)", [ "((x/width)^2 + (y/height)^2)",  "0",  "amp*((x/width)^2 + (y/height)^2)",  "0.4*(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)",  "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)",  "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01",  "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"]);
-createEntryBoxes(controls, 15, "Enter potential V(x, y, t)", 1, []);
-createLabel(controls, 16, "(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)", "");
-createCheckbox(controls, 17, "Add absorbing boundaries (may incur instability!)", false);
+createScalarParameterSlider(controls, 14, "Particle count upon placement of new wave function", "int", {'value': 65536, 'min': 4096, 'max': 1048576, 'step': 4096});
+createCheckbox(controls, 15, "Show particle trails", false);
+createSelectionList(controls, 16, 0, "Preset V(x, y, t)", [ "((x/width)^2 + (y/height)^2)",  "0",  "amp*((x/width)^2 + (y/height)^2)",  "0.4*(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)",  "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)",  "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01",  "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"]);
+createEntryBoxes(controls, 17, "Enter potential V(x, y, t)", 1, []);
+createLabel(controls, 18, "(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)", "");
+createCheckbox(controls, 19, "Add absorbing boundaries (MAY INCUR INSTABILITY, particularly if the potential is non-zero at the boundaries!)", false);
+createUploadImage(controls, 20, "Set V(x, y) using image", "POTENTIAL_GRID_WIDTH", "POTENTIAL_GRID_HEIGHT");
 

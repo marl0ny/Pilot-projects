@@ -104,7 +104,7 @@ void imgui_controls(void *void_params) {
         ImGui::EndMenu();
     }
     ImGui::Text("(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)");
-    ImGui::Checkbox("Add absorbing boundaries (may incur instability!)", &params->addAbsorbingBoundaries);
+    ImGui::Checkbox("Add absorbing boundaries (MAY INCUR INSTABILITY, particularly if the potential is non-zero at the boundaries!)", &params->addAbsorbingBoundaries);
 
 }
 

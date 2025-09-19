@@ -77,6 +77,10 @@ class Simulation {
         const SimParams &params,
         const Vec2 &position, float amplitude
     );
+    void set_potential_from_image(
+        const SimParams &params, 
+        const uint8_t *image_data,
+        IVec2 image_dimensions);
 };
 
 #endif

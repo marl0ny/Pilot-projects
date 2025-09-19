@@ -36,6 +36,8 @@ struct SimParams {
     float dt = (float)(0.3F);
     SelectionList mouseUsageEntry = SelectionList{0, {"Create new wave function", "Draw potential barrier", "Erase potential barrier"}};
     IVec2 waveDiscretizationDimensions = (IVec2)(IVec2 {.ind={512, 512}});
+    int potentialGridWidth = (int)(512);
+    int potentialGridHeight = (int)(512);
     Vec2 waveSimulationDimensions = (Vec2)(Vec2 {.ind={512.0, 512.0}});
     int numberOfParticles = (int)(65536);
     bool showTrails = (bool)(false);
@@ -43,6 +45,7 @@ struct SimParams {
     EntryBoxes userTextEntry = EntryBoxes{"0"};
     Label userWarningLabel = Label{};
     bool addAbsorbingBoundaries = (bool)(false);
+    UploadImage imagePotential = UploadImage{};
     int dummyValue = (int)(0);
     enum {
         T=0,
@@ -56,14 +59,17 @@ struct SimParams {
         DT=8,
         MOUSE_USAGE_ENTRY=9,
         WAVE_DISCRETIZATION_DIMENSIONS=10,
-        WAVE_SIMULATION_DIMENSIONS=11,
-        NUMBER_OF_PARTICLES=12,
-        SHOW_TRAILS=13,
-        PRESET_POTENTIAL_DROPDOWN=14,
-        USER_TEXT_ENTRY=15,
-        USER_WARNING_LABEL=16,
-        ADD_ABSORBING_BOUNDARIES=17,
-        DUMMY_VALUE=18,
+        POTENTIAL_GRID_WIDTH=11,
+        POTENTIAL_GRID_HEIGHT=12,
+        WAVE_SIMULATION_DIMENSIONS=13,
+        NUMBER_OF_PARTICLES=14,
+        SHOW_TRAILS=15,
+        PRESET_POTENTIAL_DROPDOWN=16,
+        USER_TEXT_ENTRY=17,
+        USER_WARNING_LABEL=18,
+        ADD_ABSORBING_BOUNDARIES=19,
+        IMAGE_POTENTIAL=20,
+        DUMMY_VALUE=21,
     };
     void set(int enum_val, Uniform val) {
         switch(enum_val) {
@@ -96,6 +102,12 @@ struct SimParams {
             break;
             case WAVE_DISCRETIZATION_DIMENSIONS:
             waveDiscretizationDimensions = val.ivec2;
+            break;
+            case POTENTIAL_GRID_WIDTH:
+            potentialGridWidth = val.i32;
+            break;
+            case POTENTIAL_GRID_HEIGHT:
+            potentialGridHeight = val.i32;
             break;
             case WAVE_SIMULATION_DIMENSIONS:
             waveSimulationDimensions = val.vec2;
@@ -136,6 +148,10 @@ struct SimParams {
             return {(float)dt};
             case WAVE_DISCRETIZATION_DIMENSIONS:
             return {(IVec2)waveDiscretizationDimensions};
+            case POTENTIAL_GRID_WIDTH:
+            return {(int)potentialGridWidth};
+            case POTENTIAL_GRID_HEIGHT:
+            return {(int)potentialGridHeight};
             case WAVE_SIMULATION_DIMENSIONS:
             return {(Vec2)waveSimulationDimensions};
             case NUMBER_OF_PARTICLES:

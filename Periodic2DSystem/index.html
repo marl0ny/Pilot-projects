@@ -91,8 +91,8 @@
         let sideLength = Number.parseInt(
             0.94*((clientW < clientH)? clientW: clientH));
         let arguments = [`${sideLength}`, `${sideLength}`];
-        if (window.navigator.userAgent.includes('Safari')
-            && window.navigator.userAgent.includes('iPhone'))
+        if (window.navigator.userAgent.includes('iPhone') ||
+            window.navigator.userAgent.includes('Android'))
             arguments.push('nearest');
         else
             arguments.push('linear');

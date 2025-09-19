@@ -495,3 +495,43 @@ void Simulation::sketch_potential(
         {{"tex", &m_frames.tmp}}
     );
 }
+
+void Simulation::set_potential_from_image(
+    const SimParams &params,
+    const uint8_t *image_data,
+    IVec2 image_dimensions) {
+    int w = image_dimensions[0];
+    int h = image_dimensions[1];
+    std::vector<Vec2> potential_tmp (
+        params.waveDiscretizationDimensions[0]
+        *params.waveDiscretizationDimensions[1],
+        {.x=0.0, .y=0.0}
+    );
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            int pix_ind = i*w + j;
+            double r = (double)image_data[4*pix_ind]/255.0;
+            double g = (double)image_data[4*pix_ind + 1]/255.0;
+            double b = (double)image_data[4*pix_ind + 2]/255.0;
+            double mono_val = sqrt(r*r + g*g + b*b);
+            if (i < params.waveDiscretizationDimensions[0] 
+                && j < params.waveDiscretizationDimensions[1])
+                potential_tmp[
+                    params.waveDiscretizationDimensions[0]
+                    *(params.waveDiscretizationDimensions[0] - i - 1)
+                     + j] = {.x=0.5F*(float)mono_val, .y=0.0};
+        }
+    }
+    this->m_frames.tmp.set_pixels((float *)&potential_tmp[0]);
+    m_frames.potential.draw(
+        m_programs.modify_potential_entry,
+        {
+            {"minVal", Vec2{.x=-1.0, .y=-1.0}},
+            {"maxVal", Vec2{.x=1.0, .y=1.0}},
+            {"addAbsorbingBoundaries", 
+                    int(params.addAbsorbingBoundaries)},
+            {"rawPotentialTex", &m_frames.tmp}
+        }
+    );
+}
+
