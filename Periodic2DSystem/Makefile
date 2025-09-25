@@ -1,9 +1,9 @@
 CPP_SOURCES = simulation.cpp \
-	trajectories_wire_frame.cpp metropolis.cpp \
+	trajectories_wire_frame.cpp metropolis.cpp bmp.cpp \
 	main.cpp \
 	interactor.cpp gl_wrappers.cpp glfw_window.cpp parse.cpp user_edit_glsl.cpp matrix.cpp
 OBJECTS = simulation.o \
-	trajectories_wire_frame.o metropolis.o \
+	trajectories_wire_frame.o metropolis.o bmp.o \
 	main.o \
 	interactor.o gl_wrappers.o glfw_window.o parse.o user_edit_glsl.o matrix.o
 

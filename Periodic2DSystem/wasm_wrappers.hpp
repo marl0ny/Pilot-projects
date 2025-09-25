@@ -6,6 +6,7 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <emscripten/val.h>
 using namespace emscripten;
 #endif
 
@@ -20,6 +21,9 @@ static std::function<void(int)> s_button_pressed;
 static std::function<void(int, int)> s_selection_set;
 static std::function<void(
     int, const std::string &image_data, int, int)> s_image_set;
+static std::function<unsigned char *()> s_bmp_image;
+static std::function<unsigned int ()> s_bmp_image_size;
+static std::function<void (int, bool)> s_configure_bmp_recording;
 static std::function<void(int, std::string, float)>
     s_sim_params_set_user_float_param;
 
@@ -146,6 +150,71 @@ void image_set(
     s_image_set(param_code, image_data, width, height);
 }
 
+/* bmp_image is called in JavaScript to get the bmp image data.
+This must further call s_bmp_image_size and s_bmp_image, which
+are lambda functions that must be implemented in the source files.
+s_bmp_image gives the actual bmp image data (including its header),
+and s_bmp_image_size must give its size. 
+
+An additional function configure_bmp_recording is also called in JavaScript
+to notify when the bmp recording checkbox has been checked or not.
+This calls the function s_configure_bmp_recording, which must be implemented
+in the source file, where this is used to modify 
+the BMPRecord parameter in the SimParams instantiation.
+
+Finally, the function download_bmp_image runs JavaScript code that
+calls bmp_image to download the bmp image. This must be called from
+main looping function in the main source file, after the draw calls.
+
+So here is an outline to get bmp image screenshots to work:
+ - Add a parameter of type BMPRecord in the json file
+ - Implement s_configure_bmp_recording lambda function that
+   sets the BMPRecord's parameter field is_recording using
+   this function's is_recording parameter.
+ - In the Simulation class, implement a member that stores the
+   image data. In the Simulation class's view method, 
+   access the BMPRecord field from the view method's SimParams
+   parameter. If the BMPRecord's is_recording field is set to true,
+   get the render image data and copy it to that member that stores
+   the image data. Fill out the BMP header
+   as well and store it at the front of the image data.
+ - Implement the lambda functions s_bmp_image, s_bmp_image_size.
+   The s_bmp_image should return a pointer to the start of
+   the image data from the Simulation object, and s_bmp_image_size
+   should return its size in bytes.
+ - In the main loop function, if the BMPRecord's is_recording field
+   is true, call download_bmp_image.
+
+*/
+#ifdef __EMSCRIPTEN__
+val bmp_image() {
+    return val(typed_memory_view(s_bmp_image_size(), s_bmp_image()));
+}
+#endif
+
+void download_bmp_image(std::string postfix_name) {
+    std::string js_code1 = R"(
+    let imageData = Module.bmp_image();
+    let blob = new Blob([imageData], {type: "octet/stream"});
+    let aTag = document.createElement('a');
+    let url = URL.createObjectURL(blob);
+    aTag.hidden = true;
+    aTag.href = url;
+    let time = Date.now();
+    aTag.download = `${time}-)";
+    std::string js_code2 = R"(.bmp`;
+    new Promise(() => aTag.click()).then(() => aTag.remove());
+    )";
+    std::string js_code = js_code1 + postfix_name + js_code2;
+    #ifdef __EMSCRIPTEN__
+    emscripten_run_script(&js_code[0]);
+    #endif
+}
+
+void configure_bmp_recording(int param_code, bool b) {
+    s_configure_bmp_recording(param_code, b);
+}
+
 // void set_mouse_mode(int type) {
 //     s_input_type = type;
 // }
@@ -178,6 +247,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("button_pressed", button_pressed);
     emscripten::function("selection_set", selection_set);
     emscripten::function("image_set", image_set, allow_raw_pointers());
+    emscripten::function("bmp_image", bmp_image);
+    emscripten::function("configure_bmp_recording", configure_bmp_recording);
     emscripten::function("set_user_float_param", set_user_float_param);
 }
 #endif

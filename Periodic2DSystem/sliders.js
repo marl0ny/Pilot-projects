@@ -9,18 +9,25 @@ const ENUM_CODES = {
     M: 7,
     DT: 8,
     MOUSE_USAGE_ENTRY: 9,
-    WAVE_DISCRETIZATION_DIMENSIONS: 10,
-    POTENTIAL_GRID_WIDTH: 11,
-    POTENTIAL_GRID_HEIGHT: 12,
-    WAVE_SIMULATION_DIMENSIONS: 13,
-    NUMBER_OF_PARTICLES: 14,
-    SHOW_TRAILS: 15,
-    PRESET_POTENTIAL_DROPDOWN: 16,
-    USER_TEXT_ENTRY: 17,
-    USER_WARNING_LABEL: 18,
-    ADD_ABSORBING_BOUNDARIES: 19,
-    IMAGE_POTENTIAL: 20,
-    DUMMY_VALUE: 21,
+    NUMBER_OF_PARTICLES: 10,
+    SHOW_TRAILS: 11,
+    LINE_DIV: 12,
+    SLIDER_SET_WAVE_FUNC_TITLE: 13,
+    SLIDER_NEW_WAVE_FUNC_MOMENTUM: 14,
+    SLIDER_NEW_WAVE_FUNC_POSITION: 15,
+    ENTER_WAVE_FUNC: 16,
+    LINE_DIV2: 17,
+    WAVE_DISCRETIZATION_DIMENSIONS: 18,
+    POTENTIAL_GRID_WIDTH: 19,
+    POTENTIAL_GRID_HEIGHT: 20,
+    WAVE_SIMULATION_DIMENSIONS: 21,
+    PRESET_POTENTIAL_DROPDOWN: 22,
+    USER_TEXT_ENTRY: 23,
+    USER_WARNING_LABEL: 24,
+    ADD_ABSORBING_BOUNDARIES: 25,
+    IMAGE_POTENTIAL: 26,
+    TAKE_SCREENSHOTS: 27,
+    DUMMY_VALUE: 28,
 };
 
 function createScalarParameterSlider(
@@ -86,6 +93,32 @@ function createCheckbox(controls, enumCode, name, value, xorListName='') {
                     document.getElementById(id_).checked = false;
                 }
             }
+        }
+    }
+    );
+}
+
+
+function createBMPRecordCheckbox(controls, enumCode, name, value) {
+    let label = document.createElement("label");
+    // label.for = spec['id']
+    label.style = "color:white; font-family:Arial, Helvetica, sans-serif";
+    label.innerHTML = `${name}`
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `checkbox-${enumCode}`;
+    // slider.style ="width: 95%;"
+    // checkbox.value = value;
+    checkbox.checked = value;
+    // controls.appendChild(document.createElement("br"));
+    controls.appendChild(checkbox);
+    controls.appendChild(label);
+    controls.appendChild(document.createElement("br"));
+    checkbox.addEventListener("input", e => {
+        console.log(e.target.checked);
+        Module.configure_bmp_recording(enumCode, e.target.checked);
+        if (checkbox.checked) {
+            console.log(Module.bmp_image());
         }
     }
     );
@@ -176,7 +209,7 @@ function createUploadImage(
     controls.appendChild(im);
     // controls.appendChild(document.createElement("br"));
     controls.appendChild(imCanvas);
-    // controls.appendChild(document.createElement("br"));
+    controls.appendChild(document.createElement("br"));
     uploadImage.addEventListener(
         "change", () => {
             console.log("image uploaded");
@@ -344,11 +377,18 @@ createScalarParameterSlider(controls, 6, "New wave function size", "float", {'va
 createScalarParameterSlider(controls, 7, "Mass", "float", {'value': 1.0, 'min': 1.0, 'max': 5.0, 'step': 0.01});
 createScalarParameterSlider(controls, 8, "Time step", "float", {'value': 0.3, 'min': 0.0, 'max': 0.3, 'step': 0.01});
 createSelectionList(controls, 9, 0, "Use mouse to:", [ "Create new wave function",  "Draw potential barrier",  "Erase potential barrier"]);
-createScalarParameterSlider(controls, 14, "Particle count upon placement of new wave function", "int", {'value': 65536, 'min': 4096, 'max': 1048576, 'step': 4096});
-createCheckbox(controls, 15, "Show particle trails", false);
-createSelectionList(controls, 16, 0, "Preset V(x, y, t)", [ "((x/width)^2 + (y/height)^2)",  "0",  "amp*((x/width)^2 + (y/height)^2)",  "0.4*(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)",  "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)",  "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01",  "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"]);
-createEntryBoxes(controls, 17, "Enter potential V(x, y, t)", 1, []);
-createLabel(controls, 18, "(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)", "");
-createCheckbox(controls, 19, "Add absorbing boundaries (MAY INCUR INSTABILITY, particularly if the potential is non-zero at the boundaries!)", false);
-createUploadImage(controls, 20, "Set V(x, y) using image", "POTENTIAL_GRID_WIDTH", "POTENTIAL_GRID_HEIGHT");
+createScalarParameterSlider(controls, 10, "Particle count upon placement of new wave function", "int", {'value': 65536, 'min': 4096, 'max': 1048576, 'step': 4096});
+createCheckbox(controls, 11, "Show particle trails", false);
+createLineDivider(controls);
+createLabel(controls, 13, "Use sliders to place new wave function:", "color:white; font-family:Arial, Helvetica, sans-serif; font-weight: bold;");
+createVectorParameterSliders(controls, 14, "Initial wavenumber w.r.t. simulation domain dimensions", "Vec2", {'value': [0.0, 40.0], 'min': [-40.0, -40.0], 'max': [40.0, 40.0]});
+createVectorParameterSliders(controls, 15, "Initial position", "Vec2", {'value': [128.0, 128.0], 'min': [0.0, 0.0], 'max': [512.0, 512.0]});
+createButton(controls, 16, "Initialize new wave function");
+createLineDivider(controls);
+createSelectionList(controls, 22, 0, "Preset V(x, y, t)", [ "((x/width)^2 + (y/height)^2)",  "0",  "amp*((x/width)^2 + (y/height)^2)",  "0.4*(step(-y^2+(height*0.04)^2)+step(y^2-(height*0.06)^2))*step(-x^2+(width*0.01)^2)",  "1.0/sqrt(x^2+y^2)+1.0/sqrt((x-0.25*width)^2+(y-0.25*height)^2)",  "(x*cos(w*t/200) + y*sin(w*t/200))/500+0.01",  "0.5*(tanh(75.0*(((x/width)^2+(y/height)^2)^0.5-0.45))+1.0)"]);
+createEntryBoxes(controls, 23, "Enter potential V(x, y, t)", 1, []);
+createLabel(controls, 24, "(Please note: to ensure stability, clamping is applied to the potential so that |V(x, y, t)| < 1.)", "");
+createCheckbox(controls, 25, "Add absorbing boundaries (MAY INCUR INSTABILITY, particularly if the potential is non-zero at the boundaries!)", false);
+createUploadImage(controls, 26, "Set V(x, y) using image", "POTENTIAL_GRID_WIDTH", "POTENTIAL_GRID_HEIGHT");
+createBMPRecordCheckbox(controls, 27, "Take screenshots at every frame (uncompressed bitmap)", false);
 

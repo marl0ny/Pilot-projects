@@ -1,3 +1,4 @@
+#include "bmp.hpp"
 #include "gl_wrappers.hpp"
 #include "glfw_window.hpp"
 #include "parameters.hpp"
@@ -76,8 +77,21 @@ void simulation_ui_interface_handler(
             }
         };
         /* Perform an action upon the press of a button. */
-        s_button_pressed = [&params]
+        s_button_pressed = [&params, &sim]
             (int param_code) {
+            if (param_code == params.ENTER_WAVE_FUNC) {
+                Vec2 position = {
+                    .x=params.sliderNewWaveFuncPosition.x
+                        / float(params.waveSimulationDimensions.x),
+                    .y=params.sliderNewWaveFuncPosition.y
+                        / float(params.waveSimulationDimensions.y)
+                };
+                sim.new_wave_function(
+                        params, 
+                        position,
+                        params.sliderNewWaveFuncMomentum);
+                sim.new_particles(params, position);
+            }
         };
         /* Floating-point value parameters and their associated sliders
         can be created by the user. This notifies and keeps track of any
@@ -113,6 +127,19 @@ void simulation_ui_interface_handler(
             sim.set_potential_from_image(
                 params, (uint8_t *)&image_data[0],
                 {.ind{width, height}});
+        };
+        s_configure_bmp_recording = [&params](int c, bool is_recording) {
+            if (c == params.TAKE_SCREENSHOTS) {
+                params.takeScreenshots.is_recording = is_recording;
+            }
+        };
+        s_bmp_image = [&sim] () {
+            std::vector<unsigned char> &image_data = sim.get_image_data();
+            return (unsigned char *)&image_data[0];
+        };
+        s_bmp_image_size = [&sim]() {
+            std::vector<unsigned char> &image_data = sim.get_image_data();
+            return image_data.size();
         };
     }
 
@@ -183,6 +210,12 @@ void simulation_ui_interface_handler(
         
         main_render.draw(
             sim.view(params));
+        
+        if (params.takeScreenshots.is_recording) {
+            #ifdef __EMSCRIPTEN__
+            download_bmp_image("pilot2d");
+            #endif
+        }
 
         auto poll_events = [&] {
             // Tell GLFW to poll events
@@ -260,8 +293,9 @@ int main(int argc, char *argv[]) {
     }
     SimParams params {};
     TextureParams default_tex_params = {
-        .format=(unsigned int)
-            ((filter_type == GL_NEAREST)? GL_RGBA8: GL_RGBA32F),
+        .format=GL_RGBA8,
+        // .format=(unsigned int)
+        //     ((filter_type == GL_NEAREST)? GL_RGBA8: GL_RGBA32F),
         .width=(unsigned int)window_width,
         .height=(unsigned int)window_height,
         .generate_mipmap=!(filter_type == GL_NEAREST),

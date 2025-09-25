@@ -1,4 +1,5 @@
-/* See pg. 429 to 430 of "An Introduction to Computer Simulation Methods"
+/* See, for example, pg. 429 to 430 of
+"An Introduction to Computer Simulation Methods"
 by Harvey Gould, Jan Tobochnik, and Wolfgang Christian for a general 
 outline of the Metropolis algorithm.
 

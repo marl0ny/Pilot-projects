@@ -1,6 +1,7 @@
 #include "simulation.hpp"
 #include "trajectories_wire_frame.hpp"
 #include "metropolis.hpp"
+#include "bmp.hpp"
 
 using namespace sim_2d;
 
@@ -100,6 +101,17 @@ Frames(const TextureParams &default_tex_params, const SimParams &params):
         .wrap_s=GL_REPEAT,
         .wrap_t=GL_REPEAT
     }),
+    view_higher_res_tex_params({
+        .format=default_tex_params.format,
+        .width=(unsigned int)params.takeScreenshots.width,
+        .height=(unsigned int)params.takeScreenshots.height,
+        .generate_mipmap=default_tex_params.generate_mipmap,
+        .min_filter=default_tex_params.min_filter,
+        .mag_filter=default_tex_params.mag_filter,
+        .wrap_s=default_tex_params.wrap_s,
+        .wrap_t=default_tex_params.wrap_t
+    
+    }),
     psi{
         Quad(wave_sim_tex_params),
         Quad(wave_sim_tex_params),
@@ -118,11 +130,11 @@ Frames(const TextureParams &default_tex_params, const SimParams &params):
     potential(Quad(wave_sim_tex_params)),
     tmp(Quad(wave_sim_tex_params)),
     render_intermediates{
-        RenderTarget(default_tex_params),
-        RenderTarget(default_tex_params),
-        RenderTarget(default_tex_params)},
-    particles_view(RenderTarget(default_tex_params)),
-    render(default_tex_params),
+        RenderTarget(view_higher_res_tex_params),
+        RenderTarget(view_higher_res_tex_params),
+        RenderTarget(view_higher_res_tex_params)},
+    particles_view(RenderTarget(view_higher_res_tex_params)),
+    render(view_higher_res_tex_params),
     quad_wire_frame(get_quad_wire_frame()),
     trajectories_wire_frame(get_trajectories_wire_frame(
         decompose(params.numberOfParticles)
@@ -159,6 +171,10 @@ Simulation(const TextureParams &default_tex_params, const SimParams &params
     this->new_wave_function(
         params, Vec2{.x=0.25, 0.25}, Vec2{.x=10.0, .y=10.0});
     this->new_particles(params, Vec2{.x=0.25, 0.25});
+    m_image_data = std::vector<unsigned char>(
+        54 + get_bmp_row_byte_size(params.takeScreenshots.width)
+        *params.takeScreenshots.height, 0
+    );
 }
 
 void Simulation::new_wave_function(
@@ -297,6 +313,47 @@ const RenderTarget &Simulation
             m_frames.quad_wire_frame
         );
     }
+    if (params.takeScreenshots.is_recording) {
+        std::vector<unsigned char> image_rgba_arr(
+            4*params.takeScreenshots.width*params.takeScreenshots.height,
+            0
+        );
+        BMPHeader header (
+            params.takeScreenshots.width, 
+            params.takeScreenshots.height);
+        memcpy(
+            (unsigned char *)&m_image_data[0], 
+            &header, sizeof(BMPHeader));
+        m_frames.render.fill_array_with_contents(
+            (unsigned char *)&image_rgba_arr[0]);
+        for (int i = 0; i < params.takeScreenshots.height; i++) {
+            for (int j = 0; j < params.takeScreenshots.width; j++) {
+                // unsigned char a = image_rgba_arr[
+                //     4*(i*params.takeScreenshots.width + j)];
+                unsigned char r = image_rgba_arr[
+                    4*(i*params.takeScreenshots.width + j)];
+                unsigned char g = image_rgba_arr[
+                    4*(i*params.takeScreenshots.width + j) + 1];
+                unsigned char b = image_rgba_arr[
+                    4*(i*params.takeScreenshots.width + j) + 2];
+                m_image_data[
+                    54 + 3*(i*params.takeScreenshots.width + j)
+                ] = r;
+                m_image_data[
+                    54 + 3*(i*params.takeScreenshots.width + j) + 1
+                ] = g;
+                m_image_data[
+                    54 + 3*(i*params.takeScreenshots.width + j) + 2
+                ] = b;
+            }
+        }
+        BMPHeader *header_ptr = (BMPHeader *)(&m_image_data[0]);
+        int max_val = 0;
+        for (int i = 54; i < m_image_data.size(); i++)
+            max_val = (m_image_data[i] > max_val)? m_image_data[i]: max_val;
+        printf("Max val: %d\n", max_val);
+        print_bmp_header(*header_ptr);
+    }
     return m_frames.render;
 }
 
@@ -329,7 +386,7 @@ void Simulation::compute_guide(
     bool use_nearest_sampling = (
         m_frames.wave_sim_tex_params.min_filter != GL_LINEAR ||
         m_frames.wave_sim_tex_params.mag_filter != GL_LINEAR);
-    printf("Use nearest sampling: %d\n", use_nearest_sampling);
+    // printf("Use nearest sampling: %d\n", use_nearest_sampling);
     q2.draw(
         m_programs.guide,
         {
@@ -535,3 +592,6 @@ void Simulation::set_potential_from_image(
     );
 }
 
+std::vector<unsigned char> &Simulation::get_image_data() {
+    return m_image_data;
+}

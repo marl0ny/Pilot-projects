@@ -85,6 +85,32 @@ function createCheckbox(controls, enumCode, name, value, xorListName='') {
     );
 }
 
+
+function createBMPRecordCheckbox(controls, enumCode, name, value) {
+    let label = document.createElement("label");
+    // label.for = spec['id']
+    label.style = "color:white; font-family:Arial, Helvetica, sans-serif";
+    label.innerHTML = `${name}`
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `checkbox-${enumCode}`;
+    // slider.style ="width: 95%;"
+    // checkbox.value = value;
+    checkbox.checked = value;
+    // controls.appendChild(document.createElement("br"));
+    controls.appendChild(checkbox);
+    controls.appendChild(label);
+    controls.appendChild(document.createElement("br"));
+    checkbox.addEventListener("input", e => {
+        console.log(e.target.checked);
+        Module.configure_bmp_recording(enumCode, e.target.checked);
+        if (checkbox.checked) {
+            console.log(Module.bmp_image());
+        }
+    }
+    );
+}
+
 let gVecParams = {};
 
 function createVectorParameterSliders(
@@ -170,7 +196,7 @@ function createUploadImage(
     controls.appendChild(im);
     // controls.appendChild(document.createElement("br"));
     controls.appendChild(imCanvas);
-    // controls.appendChild(document.createElement("br"));
+    controls.appendChild(document.createElement("br"));
     uploadImage.addEventListener(
         "change", () => {
             console.log("image uploaded");
@@ -409,6 +435,13 @@ def write_sliders_js(parameters, dst_file_name):
                   + (f', "{parameter["xorListName"]}"' if 
                         "xorListName" in parameter else "") \
                   + f');\n'
+        if parameter['type'] == 'BMPRecord':
+            p = parameter['value']
+            items = p.strip('{').strip('}').split(',')
+            bool_val = items[0].strip(" ")
+            file_contents += f'createBMPRecordCheckbox('\
+                  + f'controls, {i}, "{name}", {bool_val}'\
+                  + f');\n'
     file_contents += '\n'
     with open(dst_file_name, "w") as f:
         f.write(file_contents)
@@ -495,6 +528,9 @@ def write_typed_sim_parameters_hpp(parameters, name_space, dst_file_name):
     file_contents += "\nstruct UploadImage {};\n"
     file_contents += "\ntypedef std::string Label;\n"
     file_contents += "\ntypedef bool BoolRecord;\n"
+    file_contents += "\nstruct BMPRecord {\n"
+    file_contents += "    bool is_recording;\n"
+    file_contents += "    int width, height;\n};\n"
     file_contents += "\ntypedef std::vector<std::string> EntryBoxes;\n"
     file_contents += "\nstruct SelectionList {\n"
     file_contents += "    int selected;\n"

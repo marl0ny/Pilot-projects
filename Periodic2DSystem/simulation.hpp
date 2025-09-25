@@ -9,6 +9,7 @@ using namespace sim_2d;
 struct Frames {
     TextureParams wave_sim_tex_params;
     TextureParams trajectories_tex_params;
+    TextureParams view_higher_res_tex_params;
     Quad psi[3];
     struct {
         Quad particles;
@@ -51,6 +52,7 @@ class Simulation {
     Frames m_frames;
     Quad *m_psi_ptr[3];
     int m_time_step_count;
+    std::vector<unsigned char> m_image_data;
     void compute_guide(
         Quad &q2, const Quad *wave, const Quad &q,
         const SimParams &params);
@@ -81,6 +83,7 @@ class Simulation {
         const SimParams &params, 
         const uint8_t *image_data,
         IVec2 image_dimensions);
+    std::vector<unsigned char> &get_image_data();
 };
 
 #endif

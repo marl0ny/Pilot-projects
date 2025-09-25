@@ -86,6 +86,19 @@ void imgui_controls(void *void_params) {
     if (ImGui::SliderInt("Particle count upon placement of new wave function", &params->numberOfParticles, 4096, 1048576))
             s_sim_params_set(params->NUMBER_OF_PARTICLES, params->numberOfParticles);
     ImGui::Checkbox("Show particle trails", &params->showTrails);
+    ImGui::Text("--------------------------------------------------------------------------------");
+    ImGui::Text("Use sliders to place new wave function:");
+    ImGui::Text("Initial wavenumber w.r.t. simulation domain dimensions");
+    if (ImGui::SliderFloat("sliderNewWaveFuncMomentum[0]", &params->sliderNewWaveFuncMomentum.ind[0], -40.0, 40.0))
+           s_sim_params_set(params->SLIDER_NEW_WAVE_FUNC_MOMENTUM, params->sliderNewWaveFuncMomentum);
+    if (ImGui::SliderFloat("sliderNewWaveFuncMomentum[1]", &params->sliderNewWaveFuncMomentum.ind[1], -40.0, 40.0))
+           s_sim_params_set(params->SLIDER_NEW_WAVE_FUNC_MOMENTUM, params->sliderNewWaveFuncMomentum);
+    ImGui::Text("Initial position");
+    if (ImGui::SliderFloat("sliderNewWaveFuncPosition[0]", &params->sliderNewWaveFuncPosition.ind[0], 0.0, 512.0))
+           s_sim_params_set(params->SLIDER_NEW_WAVE_FUNC_POSITION, params->sliderNewWaveFuncPosition);
+    if (ImGui::SliderFloat("sliderNewWaveFuncPosition[1]", &params->sliderNewWaveFuncPosition.ind[1], 0.0, 512.0))
+           s_sim_params_set(params->SLIDER_NEW_WAVE_FUNC_POSITION, params->sliderNewWaveFuncPosition);
+    ImGui::Text("--------------------------------------------------------------------------------");
     if (ImGui::BeginMenu("Preset V(x, y, t)")) {
         if (ImGui::MenuItem( "((x/width)^2 + (y/height)^2)"))
             s_selection_set(params->PRESET_POTENTIAL_DROPDOWN, 0);

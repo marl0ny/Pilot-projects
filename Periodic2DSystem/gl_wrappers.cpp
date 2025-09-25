@@ -1236,6 +1236,32 @@ void RenderTarget::draw(
     unbind();
 }
 
+void RenderTarget::fill_array_with_contents(float *arr) const {
+    int width = this->params.width;
+    int height = this->params.height;
+    unsigned int format = this->params.format;
+    IVec4 viewport = 
+        {.ind{0, 0, (int)width, (int)height}};
+    if (this->id != 0)
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+    glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
+        to_base(format), GL_FLOAT, (void *)arr);
+    unbind();
+}
+
+void RenderTarget::fill_array_with_contents(unsigned char *arr) const {
+    int width = this->params.width;
+    int height = this->params.height;
+    unsigned int format = this->params.format;
+    IVec4 viewport = 
+        {.ind{0, 0, (int)width, (int)height}};
+    if (this->id != 0)
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+    glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
+        to_base(format), GL_UNSIGNED_BYTE, (void *)arr);
+    unbind();
+}
+
 RenderTarget::~RenderTarget() {
     if (this->id == 0)
         return;
@@ -1531,6 +1557,30 @@ std::vector<float> Quad::get_float_pixels(IVec4 viewport) {
 std::vector<float> Quad::get_float_pixels() {
     return this->get_float_pixels(
         {.ind{0, 0, (int)this->width(), (int)this->height()}});
+}
+
+void Quad::fill_array_with_contents(float *arr) const {
+    IVec4 viewport = 
+        {.ind{0, 0, (int)this->width(), (int)this->height()}};
+    if (this->id != 0)
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+    // int size = this->width()*this->height()
+    //     *number_of_channels(this->format());
+    glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
+        to_base(this->format()), GL_FLOAT, (void *)arr);
+    unbind();
+}
+
+void Quad::fill_array_with_contents(unsigned char *arr) const {
+    IVec4 viewport = 
+        {.ind{0, 0, (int)this->width(), (int)this->height()}};
+    if (this->id != 0)
+        glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+    // int size = this->width()*this->height()
+    //     *number_of_channels(this->format());
+    glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
+        to_base(this->format()), GL_UNSIGNED_BYTE, (void *)arr);
+    unbind();
 }
  
 std::vector<uint8_t> Quad::get_byte_pixels(IVec4 viewport) {
